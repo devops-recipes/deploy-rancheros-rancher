@@ -18,5 +18,5 @@ jobs:
               # Download the rancher-compose CLI. The CLI can also be checked in statically into the
               # rancher-config directory.
               wget -qO- https://releases.rancher.com/compose/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz | tar xvz
-              ./rancher-compose-v0.12.5/rancher-compose --p $STACK_NAME --debug --verbose up -d --force-upgrade --pull --confirm-upgrade $SERVICE_NAME
+              ./rancher-compose-v0.12.5/rancher-compose --p $STACK_NAME --verbose up -d --force-upgrade --pull --confirm-upgrade $SERVICE_NAME
             popd
