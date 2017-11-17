@@ -1,1 +1,1 @@
-# deploy-private-registry-kubernetes
+
