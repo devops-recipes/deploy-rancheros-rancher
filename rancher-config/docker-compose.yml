@@ -1,7 +1,7 @@
 version: '2'
 services:
   private-image:
-    image: devopsrecipes/deploy-kube-private-registry-node-app:stable
+    image: devopsrecipes/deploy-rancheros-rancher:stable
     stdin_open: true
     tty: true
     labels:
