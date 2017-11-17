@@ -1,50 +1,22 @@
 jobs:
 
-  - name: dprk-pod-def
-    type: manifest
+  - name: deploy-rancheros-rancher_runCI
+    type: runCI
     steps:
-      - IN: dprk_app_img
-      - TASK: managed
+      - OUT: rancher_app_img
 
-  - name: dprk_provision_cluster_and_secret
+  - name: rancher_deploy_private_image
     type: runSh
     steps:
-      - IN: dprk_params
-      - IN: dprk_dockerhub
-      - IN: dprk_cliConfig
-        scopes:
-          - gke
-      - IN: dprk-pod-def
+      # This will automatically set the environment variables needed by rancher-compose
+      - IN: rancher_app_cliconfig
+      - IN: rancher_app_gitRepo
+      - IN: rancher_app_img
       - TASK:
         - script: |
-            # check if the cluster already exists on GKE
-            response=$(gcloud container clusters describe $DPRK_CLUSTER_NAME --zone $DPRK_CLICONFIG_POINTER_REGION || echo "ClusterNotFound")
-
-            if [[ $response = "ClusterNotFound" ]]
-            then
-               echo "cluster not found, creating cluster"
-               gcloud container clusters create $DPRK_CLUSTER_NAME --num-nodes=$DPRK_CLUSTER_NUM_NODES --machine-type=$DPRK_CLUSTER_MACHINE_TYPE
-            else
-               echo "cluster already exists, skipping creating cluster"
-            fi
-
-            # Generate the kubectl configuration
-            gcloud container clusters get-credentials $DPRK_CLUSTER_NAME --zone $DPRK_CLICONFIG_POINTER_REGION
-
-            # Delete and create the secret
-            kubectl delete secret $DPRK_SECRET_KEY_NAME 2>/dev/null || echo "secret does not exist"
-            kubectl create secret docker-registry $DPRK_SECRET_KEY_NAME --docker-username="$DPRK_DOCKERHUB_INTEGRATION_USERNAME" --docker-password="$DPRK_DOCKERHUB_INTEGRATION_PASSWORD" --docker-email="$DPRK_DOCKERHUB_INTEGRATION_EMAIL" --docker-server="$DPRK_DOCKERHUB_INTEGRATION_URL"/
-
-  - name: dprk-pod-deploy
-    type: deploy
-    steps:
-      - IN: dprk_pod_secret
-      - IN: dprk_cluster
-      - IN: dprk-pod-def
-      - IN: dprk_provision_cluster_and_secret
-
-  - name: dprk_provision_lb
-    type: provision
-    steps:
-      - IN: dprk_lb
-      - IN: dprk-pod-deploy
+            pushd $(shipctl get_resource_state "rancher_app_gitRepo")/rancher-config
+              # Download the rancher-compose CLI. The CLI can also be checked in statically into the
+              # rancher-config directory.
+              wget -qO- https://releases.rancher.com/compose/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz | tar xvz
+              ./rancher-compose-v0.12.5/rancher-compose --p $STACK_NAME --verbose up -d --force-upgrade --pull --confirm-upgrade $SERVICE_NAME
+            popd

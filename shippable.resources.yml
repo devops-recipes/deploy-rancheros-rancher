@@ -1,71 +1,28 @@
 resources:
 
-  - name: dprk_app_img
+  - name: rancher_app_img
     type: image
     # replace drship_dockerhub with your docker hub integration name
     integration: drship_dockerhub
     pointer:
-      # replace devopsrecipes/deploy-kube-private-registry-node-app with your
+      # replace devopsrecipes/deploy-rancheros-rancher with your
       # docker repository image name
-      sourceName: devopsrecipes/deploy-kube-private-registry-node-app
+      sourceName: devopsrecipes/deploy-rancheros-rancher
     seed:
-      versionName: "latest"
+      versionName: "stable"
 
-  - name: dprk_params
-    type: params
-    version:
-      params:
-        DPRK_APP_LABEL: "dprk-kube-app"
-        DPRK_CLUSTER_NAME: "dprk-test-cluster"
-        DPRK_CLUSTER_NUM_NODES: 1
-        DPRK_CLUSTER_MACHINE_TYPE: "n1-standard-1"
-        DPRK_SECRET_KEY_NAME: "dprk-registry-key"
-
-  - name: dprk_dockerhub
+  - name: rancher_app_cliconfig
     type: integration
-    # replace drship_dockerhub with your Docker hub integration name
-    integration: drship_dockerhub
+    # replace drship_rancher_cli_config with your key-value pair integration name
+    # where you specified the rancher key, secret and url
+    integration: drship_rancher_cli_config
 
-  - name: dprk_cliConfig
-    type: cliConfig
-    # replace drship_gcloud with your Google cloud integration name
-    integration: drship_gcloud
+  - name: rancher_app_gitRepo
+    type: gitRepo
+    # replace drship_github with your GitHub integration name
+    integration: drship_github
     pointer:
-      # replace us-central1-a with your availability zone
-      region: us-central1-a
-
-  - name: dprk_pod_secret
-    type: dockerOptions
-    version:
-      pod:
-        imagePullSecrets:
-          - name: dprk-registry-key
-
-  - name: dprk_cluster
-    type: cluster
-    # replace drship_gcloud with your google cloud integration name
-    integration: drship_gcloud
-    pointer:
-      # replace dprk-test-cluster with your google container engine cluster name
-      sourceName: "dprk-test-cluster"
-      # replace us-central1-a with your availability zone
-      region: us-central1-a
-
-  - name: dprk_lb
-    type: loadBalancer
-    # replace drship_gcloud with your google cloud integration name
-    integration: drship_gcloud
-    pointer:
-      sourceName: "dprk-loadbalancer"
-      method: LoadBalancer
-      # replace dprk-test-cluster with your google container engine cluster name
-      clusterName: "dprk-test-cluster"
-      region: us-central1-a
-    version:
-      ports:
-        - name: testport
-          protocol: TCP
-          port: 80
-      selector:
-        name: "dprk-pod-def"
-        jobName: "dprk-pod-deploy"
+      # replace devops-recipes/deploy-rancheros-rancher with source code location
+      # (e.g. GitHub) where you cloned this sample project.
+      sourceName: devops-recipes/deploy-rancheros-rancher
+      branch: master

@@ -1,0 +1,8 @@
+version: '2'
+services:
+  private-image:
+    image: devopsrecipes/deploy-kube-private-registry-node-app:stable
+    stdin_open: true
+    tty: true
+    labels:
+      io.rancher.container.pull_image: always
